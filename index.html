@@ -9,14 +9,6 @@
   <link rel="apple-touch-icon" href="./icon-512x512.png">
   <meta name="theme-color" content="#ffffff">
   
-  <style>
-    /* Inline styles moved to index.css but keeping critical ones if needed, 
-       actually they are in index.css now so we can clean this up too?
-       The user wants offline support. 
-       Let's keep the html lean.
-    */
-  </style>
-  
   <script>
     // Anti-flicker script for dark mode
     if (localStorage.getItem('rentals_theme') === 'dark' || (!('rentals_theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
@@ -25,8 +17,8 @@
       document.documentElement.classList.remove('dark');
     }
   </script>
-  <script type="module" crossorigin src="./assets/index-BVHi2VhS.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/index-UpR_r4B4.css">
+  <script type="module" crossorigin src="./assets/index-CpeDFawB.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-CMw2f2GS.css">
 </head>
 <body>
   
@@ -37,7 +29,6 @@
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        // Explicitly set the scope to the current directory to resolve origin mismatch issues in specific environments.
         navigator.serviceWorker.register('./sw.js', { scope: './' }).then(registration => {
           console.log('SW registered with scope: ', registration.scope);
         }).catch(registrationError => {

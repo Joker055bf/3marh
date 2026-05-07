@@ -28,12 +28,38 @@
   
   <script>
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js', { scope: './' }).then(registration => {
+      window.addEventListener('load', async () => {
+        try {
+          // Unregister any old service workers first to clear stale caches
+          const regs = await navigator.serviceWorker.getRegistrations();
+          for (const reg of regs) {
+            // Force update on existing registration
+            await reg.update();
+          }
+          // Clear all caches to ensure fresh content
+          if ('caches' in window) {
+            const cacheNames = await caches.keys();
+            const oldCaches = cacheNames.filter(n => n === 'rentals-v1' || n === 'rentals-v2');
+            await Promise.all(oldCaches.map(n => caches.delete(n)));
+          }
+          // Register the new service worker
+          const registration = await navigator.serviceWorker.register('./sw.js', { scope: './' });
           console.log('SW registered with scope: ', registration.scope);
-        }).catch(registrationError => {
-          console.log('SW registration failed: ', registrationError);
-        });
+          // If a new worker is found, force it to activate
+          registration.addEventListener('updatefound', () => {
+            const newWorker = registration.installing;
+            if (newWorker) {
+              newWorker.addEventListener('statechange', () => {
+                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                  // New version available - reload to get it
+                  window.location.reload();
+                }
+              });
+            }
+          });
+        } catch (err) {
+          console.log('SW setup failed: ', err);
+        }
       });
     }
   </script>

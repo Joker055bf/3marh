@@ -1,46 +1,48 @@
-const CACHE_NAME = 'rentals-v3-' + new Date().getTime();
-const urlsToCache = [
-  './',
-  './index.html',
-  './manifest.json',
-  './icon-192x192.png',
-  './icon-512x512.png'
-];
+// Static cache version - bump this when shipping new builds
+const CACHE_VERSION = 'rentals-v4';
+const CACHE_NAME = CACHE_VERSION;
 
+// Install: skip waiting, don't pre-cache anything (we'll cache on demand)
 self.addEventListener('install', event => {
-  // Force the new SW to become active immediately
   self.skipWaiting();
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(urlsToCache).catch(() => {}))
-  );
 });
 
+// Activate: claim clients and delete ALL old caches
 self.addEventListener('activate', event => {
   event.waitUntil(
-    Promise.all([
-      // Take control of all clients immediately
-      self.clients.claim(),
-      // Delete ALL old caches
-      caches.keys().then(keys =>
-        Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
-      )
-    ])
+    (async () => {
+      // Delete every cache that doesn't match current version
+      const keys = await caches.keys();
+      await Promise.all(
+        keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))
+      );
+      // Take control immediately
+      await self.clients.claim();
+    })()
   );
 });
 
+// Fetch: network-first for navigations and assets, fallback to cache only on network failure
 self.addEventListener('fetch', event => {
-  // Network-first strategy: always try fresh network, fallback to cache
+  const req = event.request;
+
+  // Only handle GET requests; let everything else pass through
+  if (req.method !== 'GET') return;
+
+  // Skip cross-origin (Firebase, Google Fonts CDN, etc.) - let browser handle natively
+  const url = new URL(req.url);
+  if (url.origin !== self.location.origin) return;
+
   event.respondWith(
-    fetch(event.request)
+    fetch(req)
       .then(response => {
-        // Update cache with fresh response
-        if (response && response.status === 200 && event.request.method === 'GET') {
-          const responseClone = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(event.request, responseClone)).catch(() => {});
+        // Only cache successful basic responses
+        if (response && response.status === 200 && response.type === 'basic') {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(req, clone)).catch(() => {});
         }
         return response;
       })
-      .catch(() => caches.match(event.request))
+      .catch(() => caches.match(req))
   );
 });

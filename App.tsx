@@ -43,9 +43,12 @@ const AppRoutes: React.FC = () => {
 };
 
 function App() {
+  const isNative = Capacitor.isNativePlatform();
+  const basename = isNative ? '/' : '/3marh/';
+
   return (
     <AuthProvider>
-      <BrowserRouter basename="/3marh/">
+      <BrowserRouter basename={basename}>
         <AppRoutes />
       </BrowserRouter>
     </AuthProvider>

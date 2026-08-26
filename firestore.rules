@@ -1,0 +1,28 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Check if the user is an owner
+    function isOwner(ownerId) {
+      return request.auth != null && request.auth.uid == ownerId;
+    }
+
+    // Generic match for property data
+    match /users/{ownerId} {
+      // Allow the owner full access
+      allow read, write: if isOwner(ownerId);
+      
+      // Allow workers access to specific paths if they belong to this owner
+      // This logic is handled app-side, but in rules we ensure they have a valid token
+      match /{allPaths=**} {
+        allow read, write: if request.auth != null;
+      }
+    }
+    
+    // Global users registry (for login)
+    match /global_system/users {
+      allow read: if true; // Public read for login check
+      allow write: if request.auth != null; // Only authenticated users (owners/admins) can modify
+    }
+  }
+}

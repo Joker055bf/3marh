@@ -1,48 +1,41 @@
-// Static cache version - bump this when shipping new builds
-const CACHE_VERSION = 'rentals-v4';
-const CACHE_NAME = CACHE_VERSION;
+const CACHE_NAME = 'rentals-pro-v1.1.85';
 
-// Install: skip waiting, don't pre-cache anything (we'll cache on demand)
 self.addEventListener('install', event => {
   self.skipWaiting();
 });
 
-// Activate: claim clients and delete ALL old caches
 self.addEventListener('activate', event => {
   event.waitUntil(
-    (async () => {
-      // Delete every cache that doesn't match current version
-      const keys = await caches.keys();
-      await Promise.all(
-        keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))
+    caches.keys().then(keys => {
+      return Promise.all(
+        keys.map(key => {
+          if (key !== CACHE_NAME) {
+            console.log('Purging old cache:', key);
+            return caches.delete(key);
+          }
+        })
       );
-      // Take control immediately
-      await self.clients.claim();
-    })()
+    }).then(() => self.clients.claim())
   );
 });
 
-// Fetch: network-first for navigations and assets, fallback to cache only on network failure
 self.addEventListener('fetch', event => {
-  const req = event.request;
+  if (event.request.method !== 'GET') return;
 
-  // Only handle GET requests; let everything else pass through
-  if (req.method !== 'GET') return;
-
-  // Skip cross-origin (Firebase, Google Fonts CDN, etc.) - let browser handle natively
-  const url = new URL(req.url);
-  if (url.origin !== self.location.origin) return;
-
+  // Network First Strategy
   event.respondWith(
-    fetch(req)
-      .then(response => {
-        // Only cache successful basic responses
-        if (response && response.status === 200 && response.type === 'basic') {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(req, clone)).catch(() => {});
+    fetch(event.request)
+      .then(networkResponse => {
+        if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
+          const responseClone = networkResponse.clone();
+          caches.open(CACHE_NAME).then(cache => {
+            cache.put(event.request, responseClone);
+          });
         }
-        return response;
+        return networkResponse;
       })
-      .catch(() => caches.match(req))
+      .catch(() => {
+        return caches.match(event.request);
+      })
   );
 });

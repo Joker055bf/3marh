@@ -1,11 +1,11 @@
 {
   "name": "متابعة عقاراتي",
-  "short_name": "عقاراتي",
-  "description": "نظام متابعة العقارات والمستأجرين",
+  "short_name": "متابعة عقاراتي",
+  "description": "A comprehensive rental property management application for managing tenants, payments, and expenses. Now a Progressive Web App (PWA) that can be installed on your phone and works offline.",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#2563eb",
+  "theme_color": "#0284c7",
   "icons": [
     {
       "src": "icon-192x192.png",

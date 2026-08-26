@@ -1,4 +1,4 @@
-const CACHE_NAME = 'rentals-pro-v1.1.85';
+const CACHE_NAME = 'rentals-pro-v1.1.86';
 
 self.addEventListener('install', event => {
   self.skipWaiting();
@@ -9,10 +9,8 @@ self.addEventListener('activate', event => {
     caches.keys().then(keys => {
       return Promise.all(
         keys.map(key => {
-          if (key !== CACHE_NAME) {
-            console.log('Purging old cache:', key);
-            return caches.delete(key);
-          }
+          console.log('Purging old cache:', key);
+          return caches.delete(key);
         })
       );
     }).then(() => self.clients.claim())
@@ -20,22 +18,6 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
-  if (event.request.method !== 'GET') return;
-
-  // Network First Strategy
-  event.respondWith(
-    fetch(event.request)
-      .then(networkResponse => {
-        if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
-          const responseClone = networkResponse.clone();
-          caches.open(CACHE_NAME).then(cache => {
-            cache.put(event.request, responseClone);
-          });
-        }
-        return networkResponse;
-      })
-      .catch(() => {
-        return caches.match(event.request);
-      })
-  );
+  // Allow all network requests to pass through directly
+  return;
 });

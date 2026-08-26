@@ -29,9 +29,23 @@ self.addEventListener('fetch', event => {
   // Only handle GET requests; let everything else pass through
   if (req.method !== 'GET') return;
 
-  // Skip cross-origin (Firebase, Google Fonts CDN, etc.) - let browser handle natively
   const url = new URL(req.url);
+  
+  // Skip cross-origin (Firebase, Google Fonts CDN, etc.) - let browser handle natively
   if (url.origin !== self.location.origin) return;
+
+  // CRITICAL: Exclude HTML pages, routes, and sw.js from caching.
+  // This prevents the browser from caching a stale index.html pointing to deleted version assets (white screen issue).
+  const isHTML = req.headers.get('accept')?.includes('text/html') || 
+                 url.pathname.endsWith('.html') || 
+                 url.pathname.endsWith('/') || 
+                 !url.pathname.includes('.'); // SPA client routes
+  const isSW = url.pathname.endsWith('sw.js');
+
+  if (isHTML || isSW) {
+    // Network-only: do not cache, do not serve from cache
+    return;
+  }
 
   event.respondWith(
     fetch(req)

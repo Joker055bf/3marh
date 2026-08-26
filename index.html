@@ -22,7 +22,7 @@
       document.documentElement.classList.remove('dark');
     }
   </script>
-  <script type="module" crossorigin src="/3marh/assets/index-CiwkizBj.js"></script>
+  <script type="module" crossorigin src="/3marh/assets/index-DEUPq022.js"></script>
   <link rel="stylesheet" crossorigin href="/3marh/assets/index-RJzI9QAN.css">
 </head>
 <body>
@@ -44,7 +44,8 @@
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', async () => {
         try {
-          const registration = await navigator.serviceWorker.register('./sw.js', { scope: './' });
+          const basePrefix = window.location.pathname.includes('/3marh/') ? '/3marh/' : '/';
+          const registration = await navigator.serviceWorker.register(basePrefix + 'sw.js', { scope: basePrefix });
           registration.update().catch(() => {});
         } catch (err) {
           console.warn('SW registration failed:', err);

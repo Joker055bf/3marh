@@ -1,0 +1,9 @@
+{
+  "name": "overdue-notifications",
+  "private": true,
+  "type": "module",
+  "description": "Daily late-payment push notifications (run by .github/workflows/overdue-notifications.yml)",
+  "dependencies": {
+    "firebase-admin": "^12.7.0"
+  }
+}

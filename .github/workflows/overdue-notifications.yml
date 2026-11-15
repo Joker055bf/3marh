@@ -1,0 +1,27 @@
+name: Late payment notifications
+
+on:
+  schedule:
+    - cron: '0 6 * * *'   # every day 06:00 UTC = 09:00 Saudi time
+  workflow_dispatch: {}    # "Run workflow" button for a manual run
+
+permissions:
+  contents: read
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: notify
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install
+        run: npm install --prefix notify --no-audit --no-fund
+      - name: Send notifications
+        run: node notify/send-overdue.mjs
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}

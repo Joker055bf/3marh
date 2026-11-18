@@ -129,19 +129,27 @@ const isPaymentActiveAndValid = (payment, tenant) => {
 export const todayInRiyadh = (now = new Date()) =>
   parseDate(new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Riyadh', year: 'numeric', month: '2-digit', day: '2-digit' }).format(now));
 
+const loadOwnerData = (ownerId, ownerDoc) => ({
+  tenants: asArray(ownerDoc[`rentals_${ownerId}_tenants`]).filter(x => x && typeof x === 'object').map(sanitizeTenant),
+  payments: asArray(ownerDoc[`rentals_${ownerId}_payments`]).filter(x => x && typeof x === 'object').map(sanitizePayment),
+});
+
+const DAY = 24 * 60 * 60 * 1000;
+export const UPCOMING_DAYS = 3;
+export const CONTRACT_REMINDER_DAYS = [30, 7, 1, 0];
+
 /**
- * Late payments in one owner's data document: not fully paid, due before today, on a contract
- * that is still running. Returns [{ building, flatNo, tenantName, dueDate, remaining }].
+ * Every unpaid payment on a running contract (the app's alert rules, without the date window).
+ * Returns [{ id, building, flatNo, tenantName, dueDate, remaining, daysUntilDue }].
  */
-export const findOverduePayments = (ownerId, ownerDoc, today = todayInRiyadh()) => {
-  const tenants = asArray(ownerDoc[`rentals_${ownerId}_tenants`]).filter(x => x && typeof x === 'object').map(sanitizeTenant);
-  const payments = asArray(ownerDoc[`rentals_${ownerId}_payments`]).filter(x => x && typeof x === 'object').map(sanitizePayment);
+export const findOpenPayments = (ownerId, ownerDoc, today = todayInRiyadh()) => {
+  const { tenants, payments } = loadOwnerData(ownerId, ownerDoc);
   const result = [];
 
   for (const p of payments) {
     if (p.isPaid) continue;
     const due = parseDate(p.dueDate);
-    if (!due || due.getTime() >= today.getTime()) continue;
+    if (!due) continue;
 
     const buildingTenants = tenants.filter(t => t.building === p.building);
     const tenant = findTenantForPayment(buildingTenants, p.tenantFlatNo, today);
@@ -161,7 +169,37 @@ export const findOverduePayments = (ownerId, ownerDoc, today = todayInRiyadh()) 
       tenantName: tenant.name,
       dueDate: p.dueDate,
       remaining: Math.max(0, Math.round((p.amount - (p.paidAmount || 0)) * 100) / 100),
+      daysUntilDue: Math.round((due.getTime() - today.getTime()) / DAY),
     });
   }
   return result.sort((a, b) => a.dueDate.localeCompare(b.dueDate));
+};
+
+/** Late payments: unpaid, due before today, contract still running. */
+export const findOverduePayments = (ownerId, ownerDoc, today = todayInRiyadh()) =>
+  findOpenPayments(ownerId, ownerDoc, today).filter(p => p.daysUntilDue < 0);
+
+/** Splits open payments into the three notification groups. */
+export const groupPayments = (open) => ({
+  overdue: open.filter(p => p.daysUntilDue < 0),
+  today: open.filter(p => p.daysUntilDue === 0),
+  upcoming: open.filter(p => p.daysUntilDue > 0 && p.daysUntilDue <= UPCOMING_DAYS),
+});
+
+/**
+ * Contracts (not terminated) whose end date is exactly 30, 7 or 1 day(s) away, or today —
+ * the same contracts the app lists as "expiring soon", but only on those reminder days.
+ */
+export const findExpiringContracts = (ownerId, ownerDoc, today = todayInRiyadh()) => {
+  const { tenants } = loadOwnerData(ownerId, ownerDoc);
+  const result = [];
+  for (const t of tenants) {
+    if (t.terminationDate || !t.startDate) continue;
+    const end = parseDate(calculateEndDate(t.startDate, t.duration, t.durationUnit));
+    if (!end) continue;
+    const daysLeft = Math.round((end.getTime() - today.getTime()) / DAY);
+    if (!CONTRACT_REMINDER_DAYS.includes(daysLeft)) continue;
+    result.push({ building: t.building, flatNo: cleanFlatNo(t.flatNo), tenantName: t.name, endDate: toIso(end), daysLeft });
+  }
+  return result.sort((a, b) => a.daysLeft - b.daysLeft);
 };

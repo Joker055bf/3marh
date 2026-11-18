@@ -3,55 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>متابعة عقاراتي</title>
-  
-  <link rel="manifest" href="/3marh/assets/manifest-D6vsdKQ1.json">
-  <link rel="apple-touch-icon" href="/3marh/assets/icon-192x192-BcWGK3Fa.png">
-  <meta name="theme-color" content="#ffffff">
-  
-  <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  
+  <title>متابعة عقاراتي — انتقلنا</title>
   <script>
-    // Anti-flicker script for dark mode
-    if (localStorage.getItem('rentals_theme') === 'dark' || (!('rentals_theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
+    // The app moved to Vercel. Keep the page the user was on: /3marh/<path> -> https://3marh.vercel.app/<path>
+    (function () {
+      var path = location.pathname.replace(/^\/3marh\/?/, '');
+      var target = 'https://3marh.vercel.app/' + path + location.search + location.hash;
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(function (rs) { rs.forEach(function (r) { r.unregister(); }); }).catch(function () {});
+      }
+      location.replace(target);
+    })();
   </script>
-  <script type="module" crossorigin src="/3marh/assets/index-D0-vcCe7.js"></script>
-  <link rel="stylesheet" crossorigin href="/3marh/assets/index-QhbRGCFy.css">
+  <meta http-equiv="refresh" content="2;url=https://3marh.vercel.app/">
+  <style>body{font-family:Cairo,Tahoma,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;background:#f8fafc;color:#334155;text-align:center}a{color:#2563eb;font-weight:bold}</style>
 </head>
 <body>
-  
-  <noscript>You need to enable JavaScript to run this app.</noscript>
-  <div id="root"></div>
-  
-  
-  <script>
-    // Purge all legacy caches on page load
-    if ('caches' in window) {
-      caches.keys().then(keys => {
-        keys.forEach(k => {
-          caches.delete(k).catch(() => {});
-        });
-      }).catch(() => {});
-    }
-
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', async () => {
-        try {
-          const basePrefix = window.location.pathname.includes('/3marh/') ? '/3marh/' : '/';
-          const registration = await navigator.serviceWorker.register(basePrefix + 'sw.js', { scope: basePrefix });
-          registration.update().catch(() => {});
-        } catch (err) {
-          console.warn('SW registration failed:', err);
-        }
-      });
-    }
-  </script>
+  <p>انتقل التطبيق إلى عنوان جديد:<br><a href="https://3marh.vercel.app/">3marh.vercel.app</a></p>
 </body>
 </html>

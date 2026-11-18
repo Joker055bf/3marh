@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">متابعة عقاراتي</string>
+    <string name="title_activity_main">متابعة عقاراتي</string>
+    <string name="package_name">com.copyof3marh002.app</string>
+    <string name="custom_url_scheme">com.copyof3marh002.app</string>
+</resources>

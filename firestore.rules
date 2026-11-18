@@ -1,0 +1,104 @@
+rules_version = '2';
+
+// Access model
+// - Every signed-in person has accounts/{uid} saying which owner they belong to and their role.
+//   Only an owner can create or change worker accounts; nobody can change their own role or owner.
+// - An owner's data (users/{ownerId} and its idPhotos) is reachable only by that owner and their workers.
+// - usernames/{name} maps a username to its login so people can sign in by username. It can be read
+//   one document at a time (you must already know the username) but never listed.
+// - Everything else, including the old users/global_system password list, is closed.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+    function accountPath() {
+      return /databases/$(database)/documents/accounts/$(request.auth.uid);
+    }
+    function hasAccount() {
+      return signedIn() && exists(accountPath());
+    }
+    function account() {
+      return get(accountPath()).data;
+    }
+    function memberOf(ownerId) {
+      return hasAccount() && account().ownerId == ownerId;
+    }
+    function ownerOf(ownerId) {
+      return memberOf(ownerId) && account().role == 'owner';
+    }
+
+    match /users/{ownerId} {
+      allow read, write: if ownerId != 'global_system' && memberOf(ownerId);
+
+      match /idPhotos/{photoId} {
+        allow read, write: if memberOf(ownerId);
+      }
+
+      // Push addresses of devices that turned on late-payment notifications.
+      // Written by the device itself; only the server-side daily job reads them.
+      match /pushTokens/{token} {
+        allow create, update: if memberOf(ownerId) && request.resource.data.uid == request.auth.uid;
+        allow delete: if memberOf(ownerId);
+      }
+    }
+
+    match /accounts/{uid} {
+      allow get: if signedIn() && (request.auth.uid == uid || ownerOf(resource.data.ownerId));
+
+      // An owner listing their workers: where('ownerId', '==', <own ownerId>).
+      allow list: if hasAccount() && account().role == 'owner' && resource.data.ownerId == account().ownerId;
+
+      allow create: if signedIn() && (
+        // New owner registering themselves: ownerId must equal their username, and they must
+        // already hold that username (claimed in usernames/ by the same login).
+        (request.auth.uid == uid
+          && request.resource.data.role == 'owner'
+          && request.resource.data.ownerId == request.resource.data.username
+          && get(/databases/$(database)/documents/usernames/$(request.resource.data.username.lower())).data.uid == uid)
+        // Owner adding one of their workers.
+        || (request.resource.data.role == 'worker' && ownerOf(request.resource.data.ownerId))
+      );
+
+      allow update: if signedIn() && (
+        // Owner editing a worker's name/permissions (role and owner cannot change).
+        (resource.data.role == 'worker'
+          && ownerOf(resource.data.ownerId)
+          && request.resource.data.role == 'worker'
+          && request.resource.data.ownerId == resource.data.ownerId)
+        // Anyone updating their own contact email.
+        || (request.auth.uid == uid && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['email']))
+      );
+
+      allow delete: if signedIn() && resource.data.role == 'worker' && ownerOf(resource.data.ownerId);
+    }
+
+    match /usernames/{name} {
+      allow get: if true;
+      allow list: if false;
+
+      allow create: if signedIn()
+        && name == name.lower()
+        && (
+          // Claiming a username for your own new login.
+          request.resource.data.uid == request.auth.uid
+          // Owner reserving a username for one of their workers.
+          || (request.resource.data.role == 'worker' && ownerOf(request.resource.data.ownerId))
+        );
+
+      allow update: if signedIn() && (
+        // The user confirming a changed sign-in email.
+        (resource.data.uid == request.auth.uid
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['authEmail', 'pendingEmail']))
+        // Owner pointing a worker's username at a replacement login.
+        || (resource.data.role == 'worker'
+          && ownerOf(resource.data.ownerId)
+          && request.resource.data.role == 'worker'
+          && request.resource.data.ownerId == resource.data.ownerId)
+      );
+
+      allow delete: if signedIn() && resource.data.role == 'worker' && ownerOf(resource.data.ownerId);
+    }
+  }
+}

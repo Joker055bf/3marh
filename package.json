@@ -1,0 +1,51 @@
+{
+  "name": "copy-of-3marh-002",
+  "private": true,
+  "version": "1.1.86",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "dev:offline": "vite --mode offline --port 3001",
+    "dev:emulator": "vite --mode emulator --port 3002",
+    "build": "vite build",
+    "preview": "vite preview",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist",
+    "emulators": "firebase emulators:start --only auth,firestore --project marh-6ccfc",
+    "migrate:accounts": "node scripts/migrate-accounts.mjs",
+    "deploy:rules": "firebase deploy --only firestore:rules --project marh-6ccfc"
+  },
+  "dependencies": {
+    "@capacitor/android": "^7.4.4",
+    "@capacitor/cli": "^7.4.4",
+    "@capacitor/core": "^7.4.4",
+    "@capacitor/filesystem": "^7.1.4",
+    "@capacitor/share": "^7.0.2",
+    "@emailjs/browser": "^4.3.3",
+    "@fontsource/cairo": "^5.2.7",
+    "@fontsource/inter": "^5.2.8",
+    "firebase": "^12.12.1",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^3.0.4",
+    "jspdf-autotable": "^5.0.2",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "react-router-dom": "^7.9.3",
+    "tesseract.js": "^7.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.14.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.0.0",
+    "autoprefixer": "^10.4.19",
+    "bcryptjs": "^2.4.3",
+    "firebase-admin": "^12.7.0",
+    "firebase-tools": "^13.35.1",
+    "gh-pages": "^6.3.0",
+    "postcss": "^8.4.38",
+    "tailwindcss": "^3.4.3",
+    "typescript": "~5.8.2",
+    "vite": "^6.2.0"
+  }
+}

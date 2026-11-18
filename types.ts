@@ -1,0 +1,112 @@
+export interface Contract {
+  contractNo: string;
+  startDate: string;
+  duration: number;
+  durationUnit?: 'months' | 'years';
+  amount: number;
+  paymentsCount: number;
+  paymentFrequency?: string;
+  terminationDate?: string;
+}
+
+export interface Tenant {
+  name: string;
+  nationality: string;
+  idNumber: string;
+  phone: string;
+  city?: string;
+  district?: string;
+  flatNo: string;
+  building: string;
+  idPhoto?: string;
+  // Current contract details
+  contractNo: string;
+  startDate: string;
+  duration: number;
+  durationUnit?: 'months' | 'years';
+  amount: number;
+  paymentsCount: number;
+  paymentFrequency?: string;
+  terminationDate?: string;
+  // History of previous contracts
+  history?: Contract[];
+  electricityMeterNumber?: string;
+}
+
+export interface Payment {
+  id: string;
+  tenantFlatNo: string;
+  building: string;
+  paymentNo: number;
+  dueDate: string;
+  amount: number;
+  isPaid: boolean;
+  paidAmount?: number;
+  partialHistory?: { amount: number; date: string }[];
+}
+
+export interface Expense {
+  id: string;
+  building: string;
+  amount: number;
+  note: string;
+  date: string;
+}
+
+export interface Note {
+  id: string;
+  building: string;
+  note: string;
+}
+
+export interface Building {
+  name: string;
+  totalUnits: number;
+  maintenanceUnits?: number;
+}
+
+export interface WorkerPermissions {
+  canAddTenants: boolean;
+  canEditTenants: boolean;
+  canRenewContracts: boolean;
+  canViewPayments: boolean;
+  canViewHistory: boolean;
+  canViewAlerts: boolean;
+  canViewReports: boolean;
+  canViewExpenses: boolean;
+  canViewNotes: boolean;
+  canViewInquiry: boolean;
+  canViewEvents: boolean;
+  canViewUnits: boolean;
+  allowedBuildings?: string[];
+  allowedUnits?: Record<string, string[]>;
+}
+
+export interface User {
+  uid?: string; // Firebase Authentication user id
+  username: string;
+  password?: string; // legacy only; never set for Firebase accounts
+  email?: string;
+  role: 'owner' | 'worker';
+  ownerId: string;
+  workerName?: string;
+  workerId?: string; // unique ID for each worker
+  permissions?: WorkerPermissions;
+}
+
+export type ActivityType = 'tenant_added' | 'tenant_edited' | 'tenant_deleted' | 'tenant_terminated' | 'payment_paid' | 'payment_partial' | 'payment_unpaid' | 'expense_added' | 'expense_deleted' | 'worker_action';
+
+export interface ActivityLog {
+  id: string;
+  type: ActivityType;
+  description: string;
+  buildingName?: string;
+  tenantName?: string;
+  flatNo?: string;
+  amount?: number;
+  date: string; // ISO date string
+  timestamp: number; // Unix ms
+  performedBy: string; // username
+  performedByName?: string; // display name
+  isWorkerAction: boolean;
+}

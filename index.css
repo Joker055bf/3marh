@@ -1,0 +1,362 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom Styles */
+body {
+  font-family: 'Cairo', sans-serif;
+  font-feature-settings: 'locl' 0;
+  -moz-font-feature-settings: 'locl' 0;
+  -webkit-font-feature-settings: 'locl' 0;
+  @apply bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200 transition-colors duration-300;
+  background-image: radial-gradient(circle at top right, rgba(59, 130, 246, 0.06), transparent 50%),
+                    radial-gradient(circle at bottom left, rgba(139, 92, 246, 0.06), transparent 50%),
+                    radial-gradient(circle at center, rgba(236, 72, 153, 0.02), transparent 70%);
+  background-attachment: scroll;
+}
+
+::selection {
+  background-color: rgba(99, 102, 241, 0.25);
+  color: inherit;
+}
+
+/* Custom Scrollbar for a premium feel */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent; 
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.4); 
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(107, 114, 128, 0.7); 
+}
+
+/* Glassmorphism Utilities */
+.glass {
+  @apply bg-white/75 dark:bg-slate-800/75 backdrop-blur-xl border border-white/30 dark:border-slate-700/40 shadow-sm;
+}
+
+.glass-card {
+  @apply bg-white/85 dark:bg-slate-800/85 backdrop-blur-xl border border-white/50 dark:border-slate-700/40 shadow-xl shadow-slate-200/50 dark:shadow-slate-900/50;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.glass-card:hover {
+  box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.12);
+}
+
+/* Hide scrollbar but keep scroll function */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+input,
+textarea,
+select,
+button {
+  font-family: inherit;
+}
+
+/* Modern Input Focus */
+input:focus,
+textarea:focus,
+select:focus {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Modern Button Base */
+button {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+button:active {
+  transform: scale(0.97);
+}
+
+/* Styles for PDF export */
+.pdf-export-container {
+  position: relative;
+  background: white;
+  width: 100%;
+  display: inline-block;
+}
+
+.pdf-export-container .watermark {
+  display: block !important;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-45deg);
+  color: rgba(0, 0, 0, 0.08);
+  font-size: 6rem;
+  font-weight: bold;
+  z-index: 1;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+/* Hide number input spinners */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type=number] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+/* Scrolling Title Animations */
+@keyframes scroll-rtl {
+  0%, 20% { transform: translateX(0); }
+  80%, 100% { transform: translateX(var(--scroll-amount, 50px)); }
+}
+
+@keyframes scroll-ltr {
+  0%, 20% { transform: translateX(0); }
+  80%, 100% { transform: translateX(calc(-1 * var(--scroll-amount, 50px))); }
+}
+
+.scrolling-title-rtl {
+  display: inline-block;
+  animation: scroll-rtl 12s linear infinite alternate;
+}
+
+.scrolling-title-ltr {
+  display: inline-block;
+  animation: scroll-ltr 12s linear infinite alternate;
+}
+
+/* Skeleton Shimmer Effect */
+@keyframes shimmer {
+  0% { background-position: -1000px 0; }
+  100% { background-position: 1000px 0; }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 8px;
+}
+
+.dark .skeleton {
+  background: linear-gradient(90deg, 
+    rgba(30, 41, 59, 0.2) 25%, 
+    rgba(30, 41, 59, 0.5) 50%, 
+    rgba(30, 41, 59, 0.2) 75%
+  );
+  background-size: 1000px 100%;
+}
+
+/* Fade-in Animation */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+/* Scale-in Animation */
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.2s ease-out forwards;
+}
+
+/* تحسين زر إضافة عامل */
+.add-worker-btn {
+  background-color: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 10px 20px;
+  border-radius: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.add-worker-btn:hover {
+  background-color: #ffffff;
+  color: #6366f1;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+}
+
+/* شاشة الإضافة والتعديل المنبثقة */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 20px;
+  animation: fadeIn 0.15s ease-out;
+}
+
+.modal-content {
+  background-color: white;
+  width: 100%;
+  max-width: 550px;
+  border-radius: 24px;
+  padding: 30px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+  animation: scaleIn 0.2s ease-out;
+}
+
+.dark .modal-content {
+  background-color: #1e293b;
+  color: white;
+  border: 1px solid rgba(71, 85, 105, 0.3);
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: #4b5563;
+}
+
+.dark .form-group label {
+  color: #cbd5e1;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 12px;
+  background: #f9fafb;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-group input:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+  outline: none;
+}
+
+.dark .form-group input {
+  background: #0f172a;
+  border-color: #334155;
+  color: white;
+}
+
+.dark .form-group input:focus {
+  border-color: #818cf8;
+  box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.1);
+}
+
+/* تصميم قسم الصلاحيات */
+.permissions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  background-color: #f3f4f6;
+  padding: 20px;
+  border-radius: 16px;
+  margin-top: 10px;
+}
+
+.dark .permissions-grid {
+  background-color: #0f172a;
+}
+
+.permission-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.permission-item input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #10b981;
+}
+
+.btn-cancel {
+  background-color: #f3f4f6;
+  color: #4b5563;
+  padding: 12px 24px;
+  border-radius: 14px;
+  font-weight: bold;
+  flex: 1;
+  transition: all 0.2s ease;
+}
+
+.btn-cancel:hover {
+  background-color: #e5e7eb;
+}
+
+.dark .btn-cancel {
+  background-color: #334155;
+  color: #f3f4f6;
+}
+
+.dark .btn-cancel:hover {
+  background-color: #475569;
+}
+
+.btn-save {
+  background-color: #10b981;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 14px;
+  font-weight: bold;
+  flex: 1;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  transition: all 0.2s ease;
+}
+
+.btn-save:hover {
+  transform: translateY(-1px);
+}
+
+/* زر تسجيل خروج صغير */
+.logout-btn-sm {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.15);
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.logout-btn-sm:hover {
+  background: rgba(239, 68, 68, 0.15);
+}

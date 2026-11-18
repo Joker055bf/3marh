@@ -2,7 +2,7 @@ name: Late payment notifications
 
 on:
   schedule:
-    - cron: '0 6 * * *'   # every day 06:00 UTC = 09:00 Saudi time
+    - cron: '17 5 * * *'  # every day 05:17 UTC = 08:17 Saudi time (off the hour: GitHub delays on-the-hour jobs)
   workflow_dispatch: {}    # "Run workflow" button for a manual run
 
 permissions:
